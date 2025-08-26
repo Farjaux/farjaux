@@ -1,5 +1,5 @@
 :root {
-  --bg: #000000;
+  --bg: #0d1321;
   --fg: #e6e6e6;
   --accent: #00ffb9;
   --accent-2: #0066ff;
@@ -88,12 +88,13 @@ body {
 /* Game area */
 #game {
   width: min(100%, 960px);
-  /* aspect-ratio: 16 / 9;*/
-  display: grid;
-  place-items: center;
+  padding: 0; /* override .card padding */
+  display: flex; /* flex so we can center the canvas */
+  align-items: center; /* vertical center */
+  justify-content: center; /* horizontal center */
   border: 2px solid #1a1a1a;
   border-radius: 16px;
-  overflow: hidden; /* keep if you want rounded corners/CRT mask */
+  overflow: hidden;
   background: #000;
   box-shadow: 0 0 0 3px #0a0a0a inset;
   position: relative;
@@ -101,11 +102,11 @@ body {
 
 #game canvas {
   image-rendering: pixelated;
-  width: 100% !important;
+  width: auto !important; /* let Phaser size it */
+  max-width: 100%;
   height: auto !important;
-  /* max-height: 70vh; */
   display: block;
-  margin: 0 auto;
+  margin: 0; /* no stray margins */
 }
 
 /* CRT scanline effect */

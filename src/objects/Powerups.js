@@ -12,8 +12,11 @@ class BasePowerup extends Phaser.GameObjects.Ellipse {
   constructor(scene, x, y, color, applyFn) {
     super(scene, x, y, 18, 18, color, 1);
     this.applyFn = applyFn;
+    this._used = false; // ← ensure pickup fires once
+
     scene.add.existing(this);
     scene.physics.add.existing(this);
+
     /** @type {Phaser.Physics.Arcade.Body} */
     this.body = this.body;
     this.body.setAllowGravity(false).setImmovable(true);
@@ -31,7 +34,12 @@ class BasePowerup extends Phaser.GameObjects.Ellipse {
 
   enablePickup(scene, player) {
     scene.physics.add.overlap(player, this, () => {
+      if (this._used) return;
+      this._used = true;
+      this.body.enable = false;
+
       this.applyFn(player);
+
       // pop + remove
       scene.tweens.add({
         targets: this,
@@ -45,8 +53,9 @@ class BasePowerup extends Phaser.GameObjects.Ellipse {
 }
 
 export class JumpBoots extends BasePowerup {
-  constructor(scene, x, y, ms = 1000) {
-    super(scene, x, y, 0x60ffa8, (player) => player.boostJump(1.2, ms));
+  constructor(scene, x, y, ms = 5000) {            // ← 5s default
+    // Boost every jump during the window; do not touch gravity
+    super(scene, x, y, 0x60ffa8, (player) => player.grantJumpBoost(1.35, ms));
   }
 }
 

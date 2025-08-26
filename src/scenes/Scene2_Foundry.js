@@ -1,25 +1,27 @@
 // src/scenes/Scene2_Foundry.js
-import Phaser from 'phaser';
-import Player from '../objects/Player.js';
-import CollectibleStar from '../objects/CollectibleStar.js';
-import { JumpBoots, Invincibility } from '../objects/Powerups.js';
-import EnemySelenite from '../objects/EnemySelenite.js';
+import Phaser from "phaser";
+import Player from "../objects/Player.js";
+import CollectibleStar from "../objects/CollectibleStar.js";
+import { JumpBoots, Invincibility } from "../objects/Powerups.js";
+import EnemySelenite from "../objects/EnemySelenite.js";
+import { FONTS } from "../config/typography"; // ← shared retro styles
 
 export default class Scene2_Foundry extends Phaser.Scene {
   constructor() {
-    super('Scene2_Foundry');
+    super("Scene2_Foundry");
     this.player = null;
     this.cursors = null;
     this.enemies = null;
   }
 
   create() {
+    this.game.events.emit("ui:showRestart");
     const { width, height } = this.scale;
 
     // World & camera (keep viewport-sized for this scene)
     this.physics.world.setBounds(0, 0, width, height);
     this.cameras.main.setBounds(0, 0, width, height);
-    this.cameras.main.setBackgroundColor('#0f0b0a'); // warmer, foundry vibe
+    this.cameras.main.setBackgroundColor("#0f0b0a"); // warmer, foundry vibe
 
     // Background plates (simple layered graphics)
     this._makeFoundryBackground(width, height);
@@ -28,18 +30,22 @@ export default class Scene2_Foundry extends Phaser.Scene {
     const platforms = this.physics.add.staticGroup();
 
     // Ground
-    platforms.create(width / 2, height - 20, 'ground')
+    platforms
+      .create(width / 2, height - 20, "ground")
       .setDisplaySize(width, 40)
       .refreshBody();
 
     // Foundry catwalks
-    platforms.create(width * 0.2, height - 110, 'ledge')
+    platforms
+      .create(width * 0.2, height - 110, "ledge")
       .setDisplaySize(140, 18)
       .refreshBody();
-    platforms.create(width * 0.5, height - 160, 'ledge')
+    platforms
+      .create(width * 0.5, height - 160, "ledge")
       .setDisplaySize(180, 18)
       .refreshBody();
-    platforms.create(width * 0.8, height - 190, 'ledge')
+    platforms
+      .create(width * 0.8, height - 190, "ledge")
       .setDisplaySize(160, 18)
       .refreshBody();
 
@@ -57,19 +63,26 @@ export default class Scene2_Foundry extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // HUD (pinned)
-    this.add.text(16, 16, 'Scene 2: The Foundry', {
-      fontFamily: 'sans-serif', fontSize: '20px', color: '#ffffff'
-    }).setScrollFactor(1);
-    this.add.text(16, 40, '← → move, SPACE/↑ jump — B: Title', {
-      fontFamily: 'sans-serif', fontSize: '14px', color: '#cccccc'
-    }).setScrollFactor(1);
+    this.add
+      .text(16, 16, "Scene 2: The Foundry", {
+        ...FONTS.body,
+        fontSize: "20px",
+        color: "#ffffff",
+      })
+      .setScrollFactor(1);
 
     // --- Collectibles & Powerups ---
     // Star on the highest catwalk
-    const ledgesSorted = platforms.getChildren().sort((a, b) => a.body.y - b.body.y);
+    const ledgesSorted = platforms
+      .getChildren()
+      .sort((a, b) => a.body.y - b.body.y);
     const topLedge = ledgesSorted[0];
-    const star = new CollectibleStar(this, topLedge.body.x + topLedge.body.width / 2, topLedge.body.y - 12);
-    star.onPickup = () => this._flash('★ +100');
+    const star = new CollectibleStar(
+      this,
+      topLedge.body.x + topLedge.body.width / 2,
+      topLedge.body.y - 12
+    );
+    star.onPickup = () => this._flash("★ +100");
     star.enablePickup(this, this.player);
 
     // Jump Boots on middle ledge
@@ -85,20 +98,28 @@ export default class Scene2_Foundry extends Phaser.Scene {
 
     // Ground patrol
     const e1 = new EnemySelenite(this, width * 0.35, height - 60, {
-      minX: width * 0.2, maxX: width * 0.45, speed: 55
+      minX: width * 0.2,
+      maxX: width * 0.45,
+      speed: 55,
     });
     // Catwalk patrols
     const e2 = new EnemySelenite(this, width * 0.5, height - 220 - 12, {
-      minX: width * 0.42, maxX: width * 0.66, speed: 65
+      minX: width * 0.42,
+      maxX: width * 0.66,
+      speed: 65,
     });
     const e3 = new EnemySelenite(this, width * 0.8, height - 300 - 12, {
-      minX: width * 0.72, maxX: width * 0.9, speed: 60
+      minX: width * 0.72,
+      maxX: width * 0.9,
+      speed: 60,
     });
 
     this.enemies.addMultiple([e1, e2, e3]);
-    this.enemies.getChildren().forEach((e) => this.physics.add.collider(e, platforms));
+    this.enemies
+      .getChildren()
+      .forEach((e) => this.physics.add.collider(e, platforms));
 
-    // Player vs enemies overlap (stomp handled in patrolUpdate; side hit = knockback + i‑frames)
+    // Player vs enemies overlap (stomp handled in patrolUpdate; side hit = knockback + i-frames)
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (enemy.dead) return;
       if (!this.player.invincible) {
@@ -110,7 +131,7 @@ export default class Scene2_Foundry extends Phaser.Scene {
     });
 
     // Dev convenience: back to Title
-    this.input.keyboard.once('keydown-B', () => this.scene.start('TitleScene'));
+    this.input.keyboard.once("keydown-B", () => this.scene.start("TitleScene"));
   }
 
   update() {
@@ -154,16 +175,33 @@ export default class Scene2_Foundry extends Phaser.Scene {
 
   _flash(text) {
     const { width } = this.scale;
-    const msg = this.add.text(width / 2, 80, text, {
-      fontFamily: 'sans-serif', fontSize: '18px', color: '#ffe9b0'
-    }).setOrigin(0.5);
-    this.tweens.add({ targets: msg, alpha: 0, duration: 900, ease: 'Sine.easeOut', onComplete: () => msg.destroy() });
+    const msg = this.add
+      .text(width / 2, 80, text, {
+        ...FONTS.subheading,
+        fontSize: "18px",
+        color: "#ffe9b0",
+      })
+      .setOrigin(0.5);
+    this.tweens.add({
+      targets: msg,
+      alpha: 0,
+      duration: 900,
+      ease: "Sine.easeOut",
+      onComplete: () => msg.destroy(),
+    });
     this.cameras.main.flash(120, 255, 255, 255);
   }
 
   _flashHit() {
-    const fx = this.add.rectangle(this.player.x, this.player.y, 40, 50, 0xff0000, 0.25).setOrigin(0.5);
+    const fx = this.add
+      .rectangle(this.player.x, this.player.y, 40, 50, 0xff0000, 0.25)
+      .setOrigin(0.5);
     fx.setDepth(1000);
-    this.tweens.add({ targets: fx, alpha: 0, duration: 180, onComplete: () => fx.destroy() });
+    this.tweens.add({
+      targets: fx,
+      alpha: 0,
+      duration: 180,
+      onComplete: () => fx.destroy(),
+    });
   }
 }

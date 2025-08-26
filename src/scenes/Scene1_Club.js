@@ -4,6 +4,7 @@ import Player from "../objects/Player.js";
 import CollectibleStar from "../objects/CollectibleStar.js";
 import { JumpBoots } from "../objects/Powerups.js";
 import EnemySelenite from "../objects/EnemySelenite.js";
+import { FONTS } from "../config/typography"; // ← shared retro styles
 
 export default class Scene1_Club extends Phaser.Scene {
   constructor() {
@@ -16,6 +17,7 @@ export default class Scene1_Club extends Phaser.Scene {
   }
 
   create() {
+    this.game.events.emit("ui:showRestart");
     const { width, height } = this.scale;
 
     const worldWidth = width * 3;
@@ -49,11 +51,11 @@ export default class Scene1_Club extends Phaser.Scene {
       .setDisplaySize(140, 20)
       .refreshBody();
     platforms
-      .create(width * 1.7, height - 200, "ledge5")
+      .create(width * 1.8, height - 200, "ledge5")
       .setDisplaySize(140, 20)
       .refreshBody();
     platforms
-      .create(width * 2.5, height - 260, "ledge6")
+      .create(width * 2.2, height - 260, "ledge6")
       .setDisplaySize(140, 20)
       .refreshBody();
     this._paintStaticBodies(platforms);
@@ -68,21 +70,17 @@ export default class Scene1_Club extends Phaser.Scene {
     // Input
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    // HUD
+    // === HUD ===
+    // If you want it pinned to the camera, use setScrollFactor(0)
+    // If you prefer it to scroll with the world, change to setScrollFactor(1)
     this.add
       .text(16, 16, "Scene 1: The Club", {
-        fontFamily: "sans-serif",
+        ...FONTS.body,
         fontSize: "20px",
         color: "#ffffff",
       })
-      .setScrollFactor(1);
-    this.add
-      .text(16, 40, "← → move, SPACE/↑ jump — stomp Selenites", {
-        fontFamily: "sans-serif",
-        fontSize: "14px",
-        color: "#cccccc",
-      })
-      .setScrollFactor(1);
+      .setScrollFactor(1)
+      .setDepth(1000);
 
     // Collectible star (on the highest platform)
     const topLedge = platforms
@@ -93,8 +91,8 @@ export default class Scene1_Club extends Phaser.Scene {
       topLedge.body.x + topLedge.body.width / 2,
       topLedge.body.y - 12
     );
-    star.enablePickup(this, this.player);
     star.onPickup = () => this._flash("★ +100");
+    star.enablePickup(this, this.player);
 
     // Powerup: Jump Boots on second ledge
     const boots = new JumpBoots(this, width * 1.3, height - 220 - 26);
@@ -125,12 +123,10 @@ export default class Scene1_Club extends Phaser.Scene {
     // Player vs enemies
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (enemy.dead) return;
-      // If the stomp logic didn't kill it, apply knockback unless invincible
       if (!this.player.invincible) {
         const dir = this.player.x < enemy.x ? -1 : 1;
         this.player.body.setVelocity(dir * -220, -220);
         this._flashHit();
-        // brief i-frames on the player
         this.player.grantInvincibility(1000);
       }
     });
@@ -145,10 +141,13 @@ export default class Scene1_Club extends Phaser.Scene {
       0
     );
     this.physics.add.existing(this.door, true);
+
     const dbg = this.add.graphics();
     dbg.lineStyle(2, 0x6ee7b7, 1).strokeRectShape(this.door.getBounds());
+
+    // EXIT label in retro font
     this.add.text(worldWidth - 100, height - 110, "EXIT ➜", {
-      fontFamily: "sans-serif",
+      ...FONTS.subheading,
       fontSize: "14px",
       color: "#a7f3d0",
     });
@@ -182,11 +181,14 @@ export default class Scene1_Club extends Phaser.Scene {
     const { width } = this.scale;
     const msg = this.add
       .text(width / 2, 80, text, {
-        fontFamily: "sans-serif",
+        ...FONTS.subheading,
         fontSize: "18px",
         color: "#ffe9b0",
+        align: "center",
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setScrollFactor(0) // ← pin to camera
+      .setDepth(1000);
     this.tweens.add({
       targets: msg,
       alpha: 0,

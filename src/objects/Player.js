@@ -34,7 +34,7 @@ export default class Player extends Phaser.GameObjects.Container {
     scene.physics.add.existing(this);
 
     /** @type {Phaser.Physics.Arcade.Body} */
-    this.body = this.body;
+    this.body = /** @type {any} */ (this.body);
     // Match body to sprite footprint (about 28x40 like you had)
     this.bodyWidth = 28;
     this.bodyHeight = 40;
@@ -49,7 +49,11 @@ export default class Player extends Phaser.GameObjects.Container {
 
     // Tunables
     this.speed = 180;
-    this.jumpVelocity = -360;
+
+    // --- Jump system ---
+    this.baseJumpVelocity = -360; // baseline jump impulse (negative = upward)
+    this.jumpBoost = 1; // multiplier applied on each jump
+    this._jumpBoostTimer = null;
 
     // Status flags
     this.invincible = false;
@@ -77,13 +81,17 @@ export default class Player extends Phaser.GameObjects.Container {
       body.setVelocityX(0);
     }
 
-    // Jump (only if on floor)
-    if ((cursors.up.isDown || cursors.space.isDown) && body.blocked.down) {
-      body.setVelocityY(this.jumpVelocity);
+    // Jump (only if on floor) — use JustDown to avoid multi-fire on same press
+    const onGround = body.blocked.down || body.touching.down;
+    const pressedJump =
+      Phaser.Input.Keyboard.JustDown(cursors.up) ||
+      Phaser.Input.Keyboard.JustDown(cursors.space);
+
+    if (pressedJump && onGround) {
+      body.setVelocityY(this.baseJumpVelocity * this.jumpBoost);
     }
 
     // Animation state
-    const onGround = body.blocked.down;
     const moving = Math.abs(body.velocity.x) > 5;
 
     if (!onGround) {
@@ -95,12 +103,35 @@ export default class Player extends Phaser.GameObjects.Container {
     }
   }
 
-  // Convenience helpers for powerups
-  boostJump(multiplier = 1.35, ms = 6000) {
-    const original = this.jumpVelocity;
-    this.jumpVelocity = original * multiplier;
-    this.scene.time.delayedCall(ms, () => (this.jumpVelocity = original));
+  // ----- POWERUP HELPERS -----
+
+  /**
+   * Timed jump boost: increases jump impulse for `ms` milliseconds.
+   * Does not change gravity or continuously push the player.
+   */
+  grantJumpBoost(multiplier = 1.35, ms = 5000) {
+    // Set/refresh the boost
+    this.jumpBoost = multiplier;
+
+    if (this._jumpBoostTimer) this._jumpBoostTimer.remove(false);
+    this._jumpBoostTimer = this.scene.time.addEvent({
+      delay: ms,
+      callback: () => {
+        this.jumpBoost = 1;
+        this._jumpBoostTimer = null;
+      },
+    });
+
     this._flashTint(0x9ae6b4);
+    // optional: message popup
+    if (this.scene._flash) this.scene._flash("JUMP BOOST!");
+  }
+
+  /**
+   * Back-compat alias (if anything still calls player.boostJump)
+   */
+  boostJump(multiplier = 1.35, ms = 5000) {
+    this.grantJumpBoost(multiplier, ms);
   }
 
   grantInvincibility(ms = 4000) {
@@ -159,20 +190,15 @@ export default class Player extends Phaser.GameObjects.Container {
     for (let i = 0; i < frames; i++) {
       ctx.clearRect(i * frameW, 0, frameW, frameH);
       this._drawCharacterFrame(ctx, i * frameW, 0, frameW, frameH, i);
-
-      // 👇 Define each frame as a slice of the canvas
       canvasTex.add(i, 0, i * frameW, 0, frameW, frameH);
     }
 
     canvasTex.refresh();
 
-    // Add frame data to texture so we can reference by index
+    // no-op placeholder to mirror your original structure
     for (let i = 0; i < frames; i++) {
-      scene.textures.addSpriteSheetFromAtlas ? null : null; // no-op; we will reference by 'key' + frame index directly
+      scene.textures.addSpriteSheetFromAtlas ? null : null;
     }
-
-    // Tell the sprite to use these frames; Phaser auto splits by frame index if we pass { frame: n }
-    // We'll just reference { key: 'farjaux-frames', frame: n } in anims.
   }
 
   _ensureAnims(scene) {
@@ -216,37 +242,21 @@ export default class Player extends Phaser.GameObjects.Container {
 
   /**
    * Draws one pixel-art frame into the canvas.
-   * Simple 16x20 grid character:
-   *  - Top hat
-   *  - Face with single eye (direction handled via flipX on sprite)
-   *  - Coat over shirt
-   *  - Pants + boots
-   *  - Legs move on walk frames
    */
   _drawCharacterFrame(ctx, ox, oy, w, h, frameIndex) {
-    // Helper to paint a rectangle "pixel"
     const p = (x, y, cw, ch, color) => {
       ctx.fillStyle = color;
       ctx.fillRect(ox + x, oy + y, cw, ch);
     };
 
-    // Define a coarse pixel size (each "pixel" is 1x1 canvas unit here;
-    // we drew directly in canvas units; scaling is applied on the sprite)
-    // Draw from top to bottom.
-
     const C = this.palette;
 
     // --- Top Hat (3 rows)
-    // brim
     p(2, 2, 12, 1, C.hat);
-    // crown
     p(4, 0, 8, 2, C.hat);
 
-    // --- Head (face 4 rows)
-    // head box
+    // --- Head
     p(5, 3, 6, 4, C.skin);
-    // eye (always on "forward" side; we rely on sprite flipX to face)
-    // put eye at x=9 so when facing right it’s “forward”
     p(9, 4, 1, 1, C.eye);
 
     // --- Shirt/Neck
@@ -254,23 +264,17 @@ export default class Player extends Phaser.GameObjects.Container {
 
     // --- Coat (torso)
     p(4, 8, 8, 6, C.coat);
-
-    // Lapel hint (lighter line)
     p(5, 9, 1, 2, C.shirt);
     p(10, 9, 1, 2, C.shirt);
 
-    // --- Arms (simple)
-    // idle/jump: straight; walk: swing
+    // --- Arms
     if (frameIndex === 1) {
-      // walkA: left arm forward, right back
       p(3, 9, 1, 4, C.coat);
       p(12, 10, 1, 3, C.coat);
     } else if (frameIndex === 2) {
-      // walkB: right arm forward, left back
       p(3, 10, 1, 3, C.coat);
       p(12, 9, 1, 4, C.coat);
     } else {
-      // idle / jump
       p(3, 9, 1, 4, C.coat);
       p(12, 9, 1, 4, C.coat);
     }
@@ -278,27 +282,22 @@ export default class Player extends Phaser.GameObjects.Container {
     // --- Pants
     p(5, 14, 6, 3, C.pants);
 
-    // --- Legs (animated)
+    // --- Legs
     if (frameIndex === 1) {
-      // walkA: left forward, right back
-      p(5, 17, 2, 2, C.pants); // left
-      p(9, 17, 2, 1, C.pants); // right (shorter)
+      p(5, 17, 2, 2, C.pants);
+      p(9, 17, 2, 1, C.pants);
     } else if (frameIndex === 2) {
-      // walkB: right forward, left back
-      p(5, 17, 2, 1, C.pants); // left (shorter)
-      p(9, 17, 2, 2, C.pants); // right
+      p(5, 17, 2, 1, C.pants);
+      p(9, 17, 2, 2, C.pants);
     } else if (frameIndex === 3) {
-      // jump: tucked legs
       p(6, 17, 4, 1, C.pants);
     } else {
-      // idle: both straight
       p(5, 17, 2, 2, C.pants);
       p(9, 17, 2, 2, C.pants);
     }
 
     // --- Boots
     if (frameIndex === 3) {
-      // jump: small boots
       p(6, 18, 4, 1, C.boots);
     } else {
       p(5, 19, 2, 1, C.boots);
