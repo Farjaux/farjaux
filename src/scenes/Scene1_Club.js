@@ -30,8 +30,11 @@ export default class Scene1_Club extends Phaser.Scene {
     const platforms = this.physics.add.staticGroup();
     platforms.create(worldWidth / 2, height - 20, 'ground').setDisplaySize(worldWidth, 40).refreshBody();
     platforms.create(width * 0.5, height - 120, 'ledge').setDisplaySize(160, 20).refreshBody();
-    platforms.create(width * 1.3, height - 200, 'ledge2').setDisplaySize(180, 20).refreshBody();
-    platforms.create(width * 2.2, height - 280, 'ledge3').setDisplaySize(140, 20).refreshBody();
+    platforms.create(width * 0.8, height - 140, 'ledge2').setDisplaySize(180, 20).refreshBody();
+    platforms.create(width * 1.1, height - 160, 'ledge3').setDisplaySize(140, 20).refreshBody();
+      platforms.create(width * 1.4, height - 180, 'ledge4').setDisplaySize(140, 20).refreshBody();
+        platforms.create(width * 1.7, height - 200, 'ledge5').setDisplaySize(140, 20).refreshBody();
+          platforms.create(width * 2.0, height - 220, 'ledge6').setDisplaySize(140, 20).refreshBody();
     this._paintStaticBodies(platforms);
 
     // Player
@@ -45,8 +48,8 @@ export default class Scene1_Club extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // HUD
-    this.add.text(16, 16, 'Scene 1: The Club', { fontFamily: 'sans-serif', fontSize: '20px', color: '#ffffff' }).setScrollFactor(0);
-    this.add.text(16, 40, '← → move, SPACE/↑ jump — stomp Selenites', { fontFamily: 'sans-serif', fontSize: '14px', color: '#cccccc' }).setScrollFactor(0);
+    this.add.text(16, 16, 'Scene 1: The Club', { fontFamily: 'sans-serif', fontSize: '20px', color: '#ffffff' }).setScrollFactor(1);
+    this.add.text(16, 40, '← → move, SPACE/↑ jump — stomp Selenites', { fontFamily: 'sans-serif', fontSize: '14px', color: '#cccccc' }).setScrollFactor(1);
 
     // Collectible star (on the highest platform)
     const topLedge = platforms.getChildren().sort((a, b) => a.body.y - b.body.y)[0];

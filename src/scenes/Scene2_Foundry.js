@@ -33,13 +33,13 @@ export default class Scene2_Foundry extends Phaser.Scene {
       .refreshBody();
 
     // Foundry catwalks
-    platforms.create(width * 0.2, height - 140, 'ledge')
+    platforms.create(width * 0.2, height - 110, 'ledge')
       .setDisplaySize(140, 18)
       .refreshBody();
-    platforms.create(width * 0.5, height - 220, 'ledge')
-      .setDisplaySize(200, 18)
+    platforms.create(width * 0.5, height - 160, 'ledge')
+      .setDisplaySize(180, 18)
       .refreshBody();
-    platforms.create(width * 0.8, height - 300, 'ledge')
+    platforms.create(width * 0.8, height - 190, 'ledge')
       .setDisplaySize(160, 18)
       .refreshBody();
 
@@ -59,10 +59,10 @@ export default class Scene2_Foundry extends Phaser.Scene {
     // HUD (pinned)
     this.add.text(16, 16, 'Scene 2: The Foundry', {
       fontFamily: 'sans-serif', fontSize: '20px', color: '#ffffff'
-    }).setScrollFactor(0);
+    }).setScrollFactor(1);
     this.add.text(16, 40, '← → move, SPACE/↑ jump — B: Title', {
       fontFamily: 'sans-serif', fontSize: '14px', color: '#cccccc'
-    }).setScrollFactor(0);
+    }).setScrollFactor(1);
 
     // --- Collectibles & Powerups ---
     // Star on the highest catwalk
