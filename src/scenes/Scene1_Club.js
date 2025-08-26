@@ -1,13 +1,13 @@
 // src/scenes/Scene1_Club.js
-import Phaser from 'phaser';
-import Player from '../objects/Player.js';
-import CollectibleStar from '../objects/CollectibleStar.js';
-import { JumpBoots } from '../objects/Powerups.js';
-import EnemySelenite from '../objects/EnemySelenite.js';
+import Phaser from "phaser";
+import Player from "../objects/Player.js";
+import CollectibleStar from "../objects/CollectibleStar.js";
+import { JumpBoots } from "../objects/Powerups.js";
+import EnemySelenite from "../objects/EnemySelenite.js";
 
 export default class Scene1_Club extends Phaser.Scene {
   constructor() {
-    super('Scene1_Club');
+    super("Scene1_Club");
     this.player = null;
     this.cursors = null;
     this.door = null;
@@ -23,18 +23,39 @@ export default class Scene1_Club extends Phaser.Scene {
 
     this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
     this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
-    this.cameras.main.setBackgroundColor('#0a0a12');
+    this.cameras.main.setBackgroundColor("#0a0a12");
     this._makeParallaxLayers(worldWidth, height);
 
     // Platforms
     const platforms = this.physics.add.staticGroup();
-    platforms.create(worldWidth / 2, height - 20, 'ground').setDisplaySize(worldWidth, 40).refreshBody();
-    platforms.create(width * 0.5, height - 120, 'ledge').setDisplaySize(160, 20).refreshBody();
-    platforms.create(width * 0.8, height - 140, 'ledge2').setDisplaySize(180, 20).refreshBody();
-    platforms.create(width * 1.1, height - 160, 'ledge3').setDisplaySize(140, 20).refreshBody();
-      platforms.create(width * 1.4, height - 180, 'ledge4').setDisplaySize(140, 20).refreshBody();
-        platforms.create(width * 1.7, height - 200, 'ledge5').setDisplaySize(140, 20).refreshBody();
-          platforms.create(width * 2.0, height - 220, 'ledge6').setDisplaySize(140, 20).refreshBody();
+    platforms
+      .create(worldWidth / 2, height - 20, "ground")
+      .setDisplaySize(worldWidth, 40)
+      .refreshBody();
+    platforms
+      .create(width * 0.5, height - 120, "ledge")
+      .setDisplaySize(160, 20)
+      .refreshBody();
+    platforms
+      .create(width * 0.8, height - 140, "ledge2")
+      .setDisplaySize(180, 20)
+      .refreshBody();
+    platforms
+      .create(width * 1.1, height - 160, "ledge3")
+      .setDisplaySize(140, 20)
+      .refreshBody();
+    platforms
+      .create(width * 1.4, height - 180, "ledge4")
+      .setDisplaySize(140, 20)
+      .refreshBody();
+    platforms
+      .create(width * 1.7, height - 200, "ledge5")
+      .setDisplaySize(140, 20)
+      .refreshBody();
+    platforms
+      .create(width * 2.5, height - 260, "ledge6")
+      .setDisplaySize(140, 20)
+      .refreshBody();
     this._paintStaticBodies(platforms);
 
     // Player
@@ -48,14 +69,32 @@ export default class Scene1_Club extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // HUD
-    this.add.text(16, 16, 'Scene 1: The Club', { fontFamily: 'sans-serif', fontSize: '20px', color: '#ffffff' }).setScrollFactor(1);
-    this.add.text(16, 40, '← → move, SPACE/↑ jump — stomp Selenites', { fontFamily: 'sans-serif', fontSize: '14px', color: '#cccccc' }).setScrollFactor(1);
+    this.add
+      .text(16, 16, "Scene 1: The Club", {
+        fontFamily: "sans-serif",
+        fontSize: "20px",
+        color: "#ffffff",
+      })
+      .setScrollFactor(1);
+    this.add
+      .text(16, 40, "← → move, SPACE/↑ jump — stomp Selenites", {
+        fontFamily: "sans-serif",
+        fontSize: "14px",
+        color: "#cccccc",
+      })
+      .setScrollFactor(1);
 
     // Collectible star (on the highest platform)
-    const topLedge = platforms.getChildren().sort((a, b) => a.body.y - b.body.y)[0];
-    const star = new CollectibleStar(this, topLedge.body.x + topLedge.body.width / 2, topLedge.body.y - 12);
+    const topLedge = platforms
+      .getChildren()
+      .sort((a, b) => a.body.y - b.body.y)[0];
+    const star = new CollectibleStar(
+      this,
+      topLedge.body.x + topLedge.body.width / 2,
+      topLedge.body.y - 12
+    );
     star.enablePickup(this, this.player);
-    star.onPickup = () => this._flash('★ +100');
+    star.onPickup = () => this._flash("★ +100");
 
     // Powerup: Jump Boots on second ledge
     const boots = new JumpBoots(this, width * 1.3, height - 220 - 26);
@@ -63,11 +102,25 @@ export default class Scene1_Club extends Phaser.Scene {
 
     // Enemies
     this.enemies = this.add.group();
-    const s1 = new EnemySelenite(this, 360, height - 60, { minX: 260, maxX: 520, speed: 55 });
-    const s2 = new EnemySelenite(this, width * 1.3, height - 220 - 12, { minX: width * 1.1, maxX: width * 1.45, speed: 70 });
-    const s3 = new EnemySelenite(this, worldWidth - 200, height - 60, { minX: worldWidth - 320, maxX: worldWidth - 80, speed: 60 });
+    const s1 = new EnemySelenite(this, 360, height - 60, {
+      minX: 260,
+      maxX: 520,
+      speed: 55,
+    });
+    const s2 = new EnemySelenite(this, width * 1.3, height - 220 - 12, {
+      minX: width * 1.1,
+      maxX: width * 1.45,
+      speed: 70,
+    });
+    const s3 = new EnemySelenite(this, worldWidth - 200, height - 60, {
+      minX: worldWidth - 320,
+      maxX: worldWidth - 80,
+      speed: 60,
+    });
     this.enemies.addMultiple([s1, s2, s3]);
-    this.enemies.getChildren().forEach((e) => this.physics.add.collider(e, platforms));
+    this.enemies
+      .getChildren()
+      .forEach((e) => this.physics.add.collider(e, platforms));
 
     // Player vs enemies
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
@@ -83,17 +136,31 @@ export default class Scene1_Club extends Phaser.Scene {
     });
 
     // Exit door
-    this.door = this.add.rectangle(worldWidth - 40, height - 60, 24, 80, 0x00ff00, 0);
+    this.door = this.add.rectangle(
+      worldWidth - 40,
+      height - 60,
+      24,
+      80,
+      0x00ff00,
+      0
+    );
     this.physics.add.existing(this.door, true);
     const dbg = this.add.graphics();
     dbg.lineStyle(2, 0x6ee7b7, 1).strokeRectShape(this.door.getBounds());
-    this.add.text(worldWidth - 100, height - 110, 'EXIT ➜', { fontFamily: 'sans-serif', fontSize: '14px', color: '#a7f3d0' });
+    this.add.text(worldWidth - 100, height - 110, "EXIT ➜", {
+      fontFamily: "sans-serif",
+      fontSize: "14px",
+      color: "#a7f3d0",
+    });
 
     this.physics.add.overlap(this.player, this.door, () => {
       if (this.exiting) return;
       this.exiting = true;
       this.cameras.main.fadeOut(300, 0, 0, 0);
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => this.scene.start('Scene2_Foundry'));
+      this.cameras.main.once(
+        Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+        () => this.scene.start("Scene2_Foundry")
+      );
     });
   }
 
@@ -113,15 +180,34 @@ export default class Scene1_Club extends Phaser.Scene {
 
   _flash(text) {
     const { width } = this.scale;
-    const msg = this.add.text(width / 2, 80, text, { fontFamily: 'sans-serif', fontSize: '18px', color: '#ffe9b0' }).setOrigin(0.5);
-    this.tweens.add({ targets: msg, alpha: 0, duration: 900, ease: 'Sine.easeOut', onComplete: () => msg.destroy() });
+    const msg = this.add
+      .text(width / 2, 80, text, {
+        fontFamily: "sans-serif",
+        fontSize: "18px",
+        color: "#ffe9b0",
+      })
+      .setOrigin(0.5);
+    this.tweens.add({
+      targets: msg,
+      alpha: 0,
+      duration: 900,
+      ease: "Sine.easeOut",
+      onComplete: () => msg.destroy(),
+    });
     this.cameras.main.flash(120, 255, 255, 255);
   }
 
   _flashHit() {
-    const fx = this.add.rectangle(this.player.x, this.player.y, 40, 50, 0xff0000, 0.25).setOrigin(0.5);
+    const fx = this.add
+      .rectangle(this.player.x, this.player.y, 40, 50, 0xff0000, 0.25)
+      .setOrigin(0.5);
     fx.setDepth(1000);
-    this.tweens.add({ targets: fx, alpha: 0, duration: 180, onComplete: () => fx.destroy() });
+    this.tweens.add({
+      targets: fx,
+      alpha: 0,
+      duration: 180,
+      onComplete: () => fx.destroy(),
+    });
   }
 
   _makeParallaxLayers(worldWidth, height) {
@@ -146,7 +232,8 @@ export default class Scene1_Club extends Phaser.Scene {
     for (let x = 0; x < worldWidth + blockW; x += blockW) {
       const h = height * (0.25 + Math.random() * 0.15);
       mid.fillRect(x, height - 40 - h, blockW - 12, h);
-      if (Math.random() < 0.5) mid.fillRect(x + 18, height - 40 - h - 18, 6, 18);
+      if (Math.random() < 0.5)
+        mid.fillRect(x + 18, height - 40 - h - 18, 6, 18);
     }
     mid.setScrollFactor(0.5, 0).setDepth(-80);
 

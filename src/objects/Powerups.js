@@ -1,5 +1,5 @@
 // src/objects/Powerups.js
-import Phaser from 'phaser';
+import Phaser from "phaser";
 
 class BasePowerup extends Phaser.GameObjects.Ellipse {
   /**
@@ -25,7 +25,7 @@ class BasePowerup extends Phaser.GameObjects.Ellipse {
       duration: 900,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: "Sine.easeInOut",
     });
   }
 
@@ -38,15 +38,15 @@ class BasePowerup extends Phaser.GameObjects.Ellipse {
         scale: 1.4,
         alpha: 0,
         duration: 180,
-        onComplete: () => this.destroy()
+        onComplete: () => this.destroy(),
       });
     });
   }
 }
 
 export class JumpBoots extends BasePowerup {
-  constructor(scene, x, y, ms = 6000) {
-    super(scene, x, y, 0x60ffa8, (player) => player.boostJump(1.4, ms));
+  constructor(scene, x, y, ms = 1000) {
+    super(scene, x, y, 0x60ffa8, (player) => player.boostJump(1.2, ms));
   }
 }
 

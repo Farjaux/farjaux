@@ -2,13 +2,106 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>A Trip to the Moon</title>
-  </head>
-  <body>
-    <div id="game"></div>
 
-    <!-- Vite will inject your JS bundle -->
+    <!-- Favicon (place favicon.ico in /public) -->
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Fonts + Styles -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+
+  <body>
+    <!-- Retro Start Overlay -->
+    <div id="start-overlay">
+      <div id="start-inner">
+        <h1 id="start-title">Farjaux Presents</h1>
+        <div id="start-sub">A Trip to the Moon</div>
+        <p id="start-tip">Press <strong>Enter</strong> or click to start</p>
+        <button id="start-btn" class="btn" style="margin-top: 14px">
+          Start Game
+        </button>
+        <div class="insert-coin">INSERT COIN</div>
+      </div>
+    </div>
+
+    <main class="wrap">
+      <div>
+        <div class="brand">Farjaux presents</div>
+        <h1 class="title">A Trip to the Moon</h1>
+      </div>
+
+      <div class="divider"></div>
+
+      <section class="card" id="about">
+        <h2>About</h2>
+        <p>
+          A browser-based, pixel-perfect homage to Georges Méliès’ 1902 film.
+          Guide <strong>Farjaux</strong> through iconic scenes—launch, lunar
+          wonders, and the triumphant return—arcade-style.
+        </p>
+        <p class="muted">Best experienced full screen with sound on 🎧</p>
+        <button
+          class="btn"
+          onclick="document.getElementById('game').scrollIntoView({ behavior: 'smooth' })"
+        >
+          Play Now
+        </button>
+      </section>
+
+      <section class="card" id="controls">
+        <h2>Controls</h2>
+        <p>← → Move • ↑ Jump • SPACE Action • Esc Pause</p>
+        <p class="muted">Controller support coming soon.</p>
+      </section>
+
+      <section class="card crt" id="game"></section>
+
+      <section class="card" id="extras">
+        <h2>Extras</h2>
+        <ul style="list-style: none; padding: 0; margin: 0">
+          <li>🎞️ Inspired by <em>Le Voyage dans la Lune</em> (1902)</li>
+          <li>🕹️ Built with Phaser + Vite</li>
+          <li>💾 Open-source soon on GitHub</li>
+        </ul>
+      </section>
+
+      <footer>© <span id="year"></span> Farjaux • All rights reserved</footer>
+    </main>
+
+    <!-- Start logic + year -->
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+
+      const start = () => {
+        if (document.body.classList.contains("started")) return;
+        document.body.classList.add("started");
+        // Tell main.js to boot the game now.
+        window.dispatchEvent(new Event("farjaux:start"));
+      };
+
+      document.getElementById("start-btn").addEventListener("click", start);
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") start();
+      });
+      // Clicking anywhere also starts
+      document
+        .getElementById("start-overlay")
+        .addEventListener("click", (e) => {
+          if (e.target.id === "start-overlay") start();
+        });
+    </script>
+
+    <!-- Vite injects your JS bundle -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
