@@ -4,6 +4,7 @@ import Player from "../objects/Player.js";
 import CollectibleStar from "../objects/CollectibleStar.js";
 import { JumpBoots, Invincibility } from "../objects/Powerups.js";
 import EnemySelenite from "../objects/EnemySelenite.js";
+import { flash, hitFlash } from "../utils/uiFx.js";
 import { FONTS } from "../config/typography"; // ← shared retro styles
 
 export default class Scene2_Foundry extends Phaser.Scene {
@@ -72,7 +73,7 @@ export default class Scene2_Foundry extends Phaser.Scene {
       .setScrollFactor(1);
 
     // --- Collectibles & Powerups ---
-    // Star on the highest catwalk
+    // Star on the highest catwalk (uses default "+100" from CollectibleStar.js)
     const ledgesSorted = platforms
       .getChildren()
       .sort((a, b) => a.body.y - b.body.y);
@@ -82,14 +83,13 @@ export default class Scene2_Foundry extends Phaser.Scene {
       topLedge.body.x + topLedge.body.width / 2,
       topLedge.body.y - 12
     );
-    star.onPickup = () => this._flash("★ +100");
     star.enablePickup(this, this.player);
 
-    // Jump Boots on middle ledge
+    // Jump Boots on middle ledge (shows "JUMP BOOST!" via Powerups.js)
     const boots = new JumpBoots(this, width * 0.5 + 40, height - 220 - 22);
     boots.enablePickup(this, this.player);
 
-    // Invincibility on left ledge
+    // Invincibility on left ledge (shows "INVINCIBLE!" via Powerups.js)
     const inv = new Invincibility(this, width * 0.2, height - 140 - 22);
     inv.enablePickup(this, this.player);
 
@@ -125,7 +125,7 @@ export default class Scene2_Foundry extends Phaser.Scene {
       if (!this.player.invincible) {
         const dir = this.player.x < enemy.x ? -1 : 1;
         this.player.body.setVelocity(dir * -220, -220);
-        this._flashHit();
+        hitFlash(this, this.player.x, this.player.y);
         this.player.grantInvincibility(1000);
       }
     });
@@ -171,37 +171,5 @@ export default class Scene2_Foundry extends Phaser.Scene {
     near.fillRect(0, height - 90, width, 6);
     near.fillRect(0, height - 120, width, 4);
     near.setDepth(-80);
-  }
-
-  _flash(text) {
-    const { width } = this.scale;
-    const msg = this.add
-      .text(width / 2, 80, text, {
-        ...FONTS.subheading,
-        fontSize: "18px",
-        color: "#ffe9b0",
-      })
-      .setOrigin(0.5);
-    this.tweens.add({
-      targets: msg,
-      alpha: 0,
-      duration: 900,
-      ease: "Sine.easeOut",
-      onComplete: () => msg.destroy(),
-    });
-    this.cameras.main.flash(120, 255, 255, 255);
-  }
-
-  _flashHit() {
-    const fx = this.add
-      .rectangle(this.player.x, this.player.y, 40, 50, 0xff0000, 0.25)
-      .setOrigin(0.5);
-    fx.setDepth(1000);
-    this.tweens.add({
-      targets: fx,
-      alpha: 0,
-      duration: 180,
-      onComplete: () => fx.destroy(),
-    });
   }
 }

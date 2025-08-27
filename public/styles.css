@@ -222,6 +222,7 @@ a:hover {
   letter-spacing: 2px;
   text-shadow: 0 0 8px rgba(0, 102, 255, 0.35);
   animation: coin-blink 1s steps(2, jump-none) infinite;
+  cursor: pointer;
 }
 
 /* Respect reduced motion */

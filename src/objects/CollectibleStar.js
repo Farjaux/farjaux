@@ -1,5 +1,6 @@
 // src/objects/CollectibleStar.js
 import Phaser from 'phaser';
+import { flash } from '../utils/uiFx.js';
 
 export default class CollectibleStar extends Phaser.GameObjects.Star {
   /**
@@ -15,15 +16,23 @@ export default class CollectibleStar extends Phaser.GameObjects.Star {
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
+
     /** @type {Phaser.Physics.Arcade.Body} */
     this.body = this.body;
     this.body.setAllowGravity(false).setImmovable(true);
     this.picked = false;
 
     // Cute twinkle
-    scene.tweens.add({ targets: this, angle: 360, duration: 3000, repeat: -1, ease: 'Linear' });
+    scene.tweens.add({
+      targets: this,
+      angle: 360,
+      duration: 3000,
+      repeat: -1,
+      ease: 'Linear',
+    });
 
-    this.onPickup = opts.onPickup ?? (() => {});
+    // Default behavior: +100 popup unless caller overrides
+    this.onPickup = opts.onPickup ?? (() => flash(scene, '+100', { fontSize: 24 }));
   }
 
   enablePickup(scene, player) {
@@ -37,7 +46,7 @@ export default class CollectibleStar extends Phaser.GameObjects.Star {
         scale: 1.6,
         alpha: 0,
         duration: 180,
-        onComplete: () => this.destroy()
+        onComplete: () => this.destroy(),
       });
 
       this.onPickup(player);

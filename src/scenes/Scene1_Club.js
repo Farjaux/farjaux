@@ -71,8 +71,6 @@ export default class Scene1_Club extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // === HUD ===
-    // If you want it pinned to the camera, use setScrollFactor(0)
-    // If you prefer it to scroll with the world, change to setScrollFactor(1)
     this.add
       .text(16, 16, "Scene 1: The Club", {
         ...FONTS.body,
@@ -91,10 +89,11 @@ export default class Scene1_Club extends Phaser.Scene {
       topLedge.body.x + topLedge.body.width / 2,
       topLedge.body.y - 12
     );
-    star.onPickup = () => this._flash("★ +100");
+    // NOTE: no custom onPickup needed; CollectibleStar defaults to flash "+100"
     star.enablePickup(this, this.player);
 
     // Powerup: Jump Boots on second ledge
+    // (JumpBoots now shows "JUMP BOOST!" via Powerups.js and applies player.grantJumpBoost)
     const boots = new JumpBoots(this, width * 1.3, height - 220 - 26);
     boots.enablePickup(this, this.player);
 
@@ -177,6 +176,7 @@ export default class Scene1_Club extends Phaser.Scene {
     });
   }
 
+  // (Kept for now; no longer used for star or jump boots)
   _flash(text) {
     const { width } = this.scale;
     const msg = this.add

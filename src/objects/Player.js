@@ -123,8 +123,7 @@ export default class Player extends Phaser.GameObjects.Container {
     });
 
     this._flashTint(0x9ae6b4);
-    // optional: message popup
-    if (this.scene._flash) this.scene._flash("JUMP BOOST!");
+    // UI popup now handled by Powerups/uiFx; no scene._flash call here.
   }
 
   /**
